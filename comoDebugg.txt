@@ -1,0 +1,3 @@
+
+Tasm /zi programa.asm
+tlink /v /3 programa.obj

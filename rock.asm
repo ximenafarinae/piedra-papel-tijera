@@ -10,10 +10,11 @@
 	PL2     db 'Player 2: $', 0
 	PL1_Win db 'Player 1 is the winner! $', 0
 	PL2_Win db 'Player 2 is the winner! $', 0
-	PLEQ    db 'P2layer 1 = Player 2 $', 0
-	NRORANDOM dw 0DH, 0AH,24H
+	PLEQ    db 'Player 1 = Player 2 $', 0
+	nroRandom dw 0DH, 0AH,24H
 	nroImp dw 0DH, 0AH,24H
 .code 
+	extrn random:proc
          ;TO DO: HACER UN A FUNCION QUE GENERE UN NRO RANDOM Y QUE AL DIVIDIRLO POR 3 DEPENDIENDO DEL RESTO TOME LA OPCION DE PIEDRA, PAPEL O TIJERA
          ;PROBAR SI EL RANDOM SE PUEDE HACER CON PALABRAS.
          ;VER GRAFICOS (PIXEL-ASCII-TXT)
@@ -118,11 +119,12 @@
 	;=======================================
    
 	Final: 
-
-		   CALL RANDOM
+		   mov cx, offset nroRandom
+		   push cx
+		   CALL random
 
 		   mov ah,9
-	       mov dx, offset NRORANDOM
+	       mov dx, offset nroRandom
 	       int 21h
 
 	       MOV AH,4Ch            	; Function to exit
@@ -131,44 +133,6 @@
     
 	main ENDP  
 
-	;GENERA UN NUMERO ALEATORIO QUE VA A SER EL VALOR QUE ELIGE LA MAQUINA PARA JUGAR.
-	random PROC
-		PUSH AX ;GUARDO LO QUE TENIA CADA REGISTRO EN EL STACK
-		PUSH CX
-		PUSH DX
-
-		MOV AX, 00h ;GENERO LA INTERRUPCION PARA GUARDAR LA HORA DEL SISTEMA EN CX:DX
-		INT 1AH
-
-		MOV [NRORANDOM], DX
-		call    NEWRANDOM   ; -> AX is a random number
-		xor     dx, dx
-		mov     cx, 10    
-		div     cx        ; here dx contains the remainder - from 0 to 9
-		add     dl, '0'   ; to ascii from '0' to '9'
-		mov     ah, 02h   ; call interrupt to display a value in DL
-		int     21h    
-		call    NEWRANDOM   ; -> AX is another random number
-		
-		POP DX	;LIMPIO EL STACK
-		POP CX
-		POP AX
-
-		RET 6
-	random ENDP  
-
-	;description
-	NEWRANDOM PROC
-		; ----------------
-; inputs: none  (modifies PRN seed variable)
-; clobbers: DX.  returns: AX = next random number
-
-    mov     ax, 25173          ; LCG Multiplier
-    mul     word ptr [NRORANDOM]     ; DX:AX = LCG multiplier * seed
-    add     ax, 13849          ; Add LCG increment value
-    ; Modulo 65536, AX = (multiplier*seed+increment) mod 65536
-    mov     [NRORANDOM], ax          ; Update seed = return value
-    ret
-	NEWRANDOM ENDP
+	
 	    
 end main
